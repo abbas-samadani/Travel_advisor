@@ -1,17 +1,30 @@
-import React, { useState , useEffect } from 'react'
+import React, { useState , useEffect, createRef } from 'react'
 import { CircularProgress, Grid, Typography, InputLabel, MenuItem, FormControl, Select } from '@material-ui/core';
 import useStyles from './Styles';
+import PlaceDetails from '../PlaceDetails/PlaceDetails';
 
-function List() {
-    const classes = useStyles();
+function List({places , childClicked , isloading, type, setType, rating, setRating}) {
+    const classes = useStyles();    
+    const [elRefs, setElRefs] = useState([]);
 
-    const [type, setType] = useState("restaurants");
-    const [rating, setRating] = useState("");
+
+    useEffect(() => {
+      const refs = Array(places?.length).fill().map((_, i) => elRefs[i] || createRef());
+      setElRefs(refs);
+  }, [places])
+
+  console.log(isloading);
     
     return (
         <div className={classes.container}>
       <Typography variant="h4">Food & Dining around you</Typography>
-      <FormControl className={classes.formControl}>
+      {isloading ? (
+        <div className={classes.loading}>
+          <CircularProgress size="5rem" />
+        </div>
+      ):(
+        <>
+        <FormControl className={classes.formControl}>
             <InputLabel id="type">Type</InputLabel>
             <Select id="type" value={type} onChange={(e) => setType(e.target.value)}>
               <MenuItem value="restaurants">Restaurants</MenuItem>
@@ -28,6 +41,21 @@ function List() {
               <MenuItem value="4.5">Above 4.5</MenuItem>
             </Select>
           </FormControl>
+          <Grid container spacing={3} className={classes.list}>
+            {places?.map((place, i) => (                           
+              <Grid ref={elRefs[i]} key={i} item xs={12}>
+                <PlaceDetails 
+                place={place} 
+                selectedItem={Number(childClicked)===i}
+                refProps={elRefs[i]}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      )}
+      
+          
       </div>
     )
 }
